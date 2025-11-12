@@ -1,0 +1,52 @@
+import networkx as nx
+import random
+import matplotlib.pyplot as plt
+
+# ایجاد یک گراف تصادفی
+def create_random_graph(n, p):
+    # ایجاد گراف گره‌های تصادفی به تعداد n با احتمال p برای هر یال
+    G = nx.erdos_renyi_graph(n, p)
+    return G
+
+# مدل Independent Cascade
+def independent_cascade(G, initial_active_nodes, p_activation=0.1):
+    # گره‌های فعال را در ابتدا تعیین می‌کنیم
+    active_nodes = set(initial_active_nodes)
+    newly_active_nodes = set(initial_active_nodes)
+    
+    while newly_active_nodes:
+        current_newly_active_nodes = set()
+        
+        # بررسی گره‌های فعال و تلاش برای فعال کردن گره‌های مجاور
+        for node in newly_active_nodes:
+            for neighbor in G.neighbors(node):
+                if neighbor not in active_nodes and random.random() < p_activation:
+                    current_newly_active_nodes.add(neighbor)
+                    active_nodes.add(neighbor)
+        
+        newly_active_nodes = current_newly_active_nodes
+
+    return active_nodes
+
+# رسم گراف
+def draw_graph(G, active_nodes):
+    pos = nx.spring_layout(G)
+    plt.figure(figsize=(8, 8))
+    nx.draw(G, pos, node_color='lightblue', with_labels=True, node_size=500)
+    nx.draw_networkx_nodes(G, pos, nodelist=active_nodes, node_color='red')
+    plt.show()
+
+# اجرای مدل
+n = 20  # تعداد گره‌ها
+p = 0.3  # احتمال ارتباط بین گره‌ها
+G = create_random_graph(n, p)
+
+# تعیین گره‌های اولیه فعال
+initial_active_nodes = [0, 1, 3]
+
+# اجرای مدل Independent Cascade
+active_nodes = independent_cascade(G, initial_active_nodes, p_activation=0.2)
+
+# نمایش گراف و گره‌های فعال
+print(f"Active nodes: {active_nodes}")
+draw_graph(G, active_nodes)
